@@ -23,28 +23,34 @@ let combination = [timestamp(), ms(), errors(), myFormat];
 
 let transport_methods = [
 ];
-var transport_daily = new (transports.DailyRotateFile)({
-    filename: 'application-%DATE%.log',
-    datePattern: 'YYYY-MM-DD-HH',
-    zippedArchive: true,
-    maxSize: '5m',
-    prepend: true,
-    format: combine(myFormat2),
-    maxFiles: '14d',
-    level: process.env.FILE_LOG_LEVEL || 'info'
-});
+
+if(process.env.LOG_TO_FILE) {
+    var transport_daily = new (transports.DailyRotateFile)({
+        filename: 'application-%DATE%.log',
+        datePattern: 'YYYY-MM-DD-HH',
+        zippedArchive: true,
+        maxSize: '5m',
+        prepend: true,
+        format: combine(myFormat2),
+        maxFiles: '14d',
+        level: process.env.FILE_LOG_LEVEL || 'info'
+    });
+    transport_methods.push(transport_daily);
+}
 
 
 
-transport_methods.push(transport_daily, new transports.Console({format: combine(colorize({all: true})), level: process.env.LOG_LEVEL}));
+transport_methods.push(new transports.Console({format: combine(colorize({all: true})), level: process.env.LOG_LEVEL}));
 
 const logger = createLogger({
     exitOnError: false,
     format: combine(...combination),
     transports: transport_methods
 });
-transport_daily.on('new', (new_file_name) => {
-    logger.file_name = new_file_name;
-});
+if(transport_daily) {
+    transport_daily.on('new', (new_file_name) => {
+        logger.file_name = new_file_name;
+    });
+}
 
 module.exports = (label) => logger.child({label});

@@ -109,11 +109,28 @@ class OZmap {
         }
     }
 
-    async read({model, limit, page, filter, select, sort, populate, retrying}) {
+    async read(model, query) {
+        if(model instanceof Object && model.constructor === Object) {
+            return this._read(model);
+        } else if(typeof model === "string") {
+            let filter = [];
+            if(query && Object.keys(query).length) {
+
+                filter = Object.keys(query).map(el => ({property: el, operator: "=", value: query[el]}));
+            }
+
+            return this._read({
+                model: model,
+                filter: filter
+            });
+        }
+    }
+    async _read({model, limit, page, filter, select, sort, populate, retrying}) {
         let body = null;
         let base_url = `${this.url}/api/v2/${model}?`;
-        if(process.env.FILTER_MODE === "URL") {
 
+
+        if(process.env.FILTER_MODE === "URL") {
             if (filter) {
                 if(!Array.isArray(filter)) {
                     filter = [filter];
