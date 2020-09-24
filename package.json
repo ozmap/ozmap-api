@@ -1,0 +1,22 @@
+{
+  "name": "ozmap-api",
+  "version": "1.0.11",
+  "description": "Módulo para comunicação com API do OZmap",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://mateusc@bitbucket.org/developmentOneZero/integracoes.git"
+  },
+  "author": "DevOZ",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/developmentOneZero/integracoes#readme",
+  "dependencies": {
+    "http-status": "^1.4.2",
+    "superagent": "^5.2.2",
+    "winston": "^3.2.1",
+    "winston-daily-rotate-file": "^4.5.0"
+  }
+}
