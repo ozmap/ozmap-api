@@ -180,7 +180,7 @@ class OZmap {
             base_url = `${base_url}&sort=${JSON.stringify(sort)}`;
         }
 
-        logger.silly(`Buscando: ${base_url}`);
+        logger.silly(`Buscando: ${base_url} ${body ? JSON.stringify(body): ''}`);
         try{
             let result = await superagent.get(base_url).set({Authorization: this.key}).send(body);
             return result.body;
