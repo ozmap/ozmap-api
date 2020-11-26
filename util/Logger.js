@@ -27,9 +27,10 @@ let transport_methods = [
 if(process.env.LOG_TO_FILE) {
     var transport_daily = new (transports.DailyRotateFile)({
         filename: 'application-%DATE%.log',
+        dirname: process.env.FILE_LOG_DIRNAME || 'logs',
         datePattern: 'YYYY-MM-DD-HH',
         zippedArchive: true,
-        maxSize: '5m',
+        maxSize: '10m',
         prepend: true,
         format: combine(myFormat2),
         maxFiles: '14d',
