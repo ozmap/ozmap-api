@@ -222,7 +222,7 @@ class OZmap {
                 page++;
             }
         }catch(e) {
-            console.error(e);
+            throw e;
         }
 
 
