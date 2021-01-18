@@ -265,7 +265,7 @@ class OZmap {
 
         logger.silly(`Buscando: ${base_url}`);
         this.exec_log.custom.push(data);
-        if(process.env.DRY_RUN === "true" && method !== "GET") {
+        if(process.env.DRY_RUN === "true" && method !== "GET" && v2_route !== "users/login") {
             return;
         }
         try{
