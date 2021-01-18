@@ -51,7 +51,8 @@ class OZmap {
                 login: login,
                 password: password
             });
-            logger.silly(`Login realizado com sucesso -> ${JSON.stringify(result.body)}`);
+            let {username, name, apiKey} = result;
+            logger.silly(`Login realizado com sucesso -> ${JSON.stringify({username, name, apiKey})}`);
 
             this.key = result.body.authorization;
         }
