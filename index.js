@@ -276,6 +276,45 @@ class OZmap {
             throw e;
         }
     }
+
+
+    async exportCroqui(property_id, export_type = "png") {
+        let base_url = `${this.url}/api/v2/render/croqui/${property_id}/${export_type}?`;
+        logger.debug(`Buscando croqui(${export_type}) com a url: ${base_url}`);
+        let res_img = await superagent
+            .get(base_url)
+            .buffer(true)
+            .parse(superagent.parse.image)
+            .set({Authorization: this.key})
+            .timeout({
+                response: 50000,
+                deadline: 50000
+            });
+
+        return res_img.body;
+    }
+
+    async exportBox(box_id, highlight = [], export_type = "png") {
+        let base_url = `${this.url}/api/v2/render/box/${box_id}/${export_type}`;
+        logger.debug(`Buscando box (${export_type}) com a url: ${base_url}`);
+        let res_box = await superagent.post(base_url)
+            .send({
+                highlight,
+                exhibition: {
+                    icon: "fas fa-list-ol",
+                    name: "number",
+                    tooltip: "Número da fibra"
+                }
+            })
+            .buffer(true).parse(superagent.parse.image)
+            .set({Authorization: this.key})
+            .timeout({
+                response: 50000,
+                deadline: 50000
+            });
+
+        return res_box.body;
+    }
 }
 
 module.exports = {OZmap: OZmap, OZModels: Models};

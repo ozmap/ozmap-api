@@ -1,6 +1,6 @@
 {
   "name": "ozmap-api",
-  "version": "1.0.18",
+  "version": "1.0.19",
   "description": "Módulo para comunicação com API do OZmap",
   "main": "index.js",
   "scripts": {
@@ -18,5 +18,8 @@
     "superagent": "^5.2.2",
     "winston": "^3.2.1",
     "winston-daily-rotate-file": "^4.5.0"
+  },
+  "devDependencies": {
+    "express": "^4.17.1"
   }
 }
