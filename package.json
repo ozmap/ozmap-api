@@ -1,6 +1,6 @@
 {
   "name": "ozmap-api",
-  "version": "1.0.22",
+  "version": "1.0.23",
   "description": "Módulo para comunicação com API do OZmap",
   "main": "index.js",
   "scripts": {
