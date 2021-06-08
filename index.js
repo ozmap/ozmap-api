@@ -1,6 +1,5 @@
 const logger = require("./util/Logger")("OZmap");
 const superagent = require("superagent");
-const HttpStatus = require('http-status');
 
 let Models = {
   box: "boxes",
@@ -19,8 +18,6 @@ let Models = {
 
 class OZmap {
   constructor(key, url) {
-
-
     this.key = key;
     this.url = url || process.env.OZMAP_URL
 
@@ -42,7 +39,7 @@ class OZmap {
     return previous;
   }
 
-  async authenticate({login, password, key}) {
+  async authenticate({login, password}) {
     logger.silly(`Realizando autenticação no OZmap`);
 
     logger.silly(`Verificando se a chave existente ainda é válida: ${this.key}`);
@@ -63,7 +60,7 @@ class OZmap {
     return this.key;
   }
 
-  async create({model, data, retrying}) {
+  async create({model, data}) {
 
     let base_url = `${this.url}/api/v2/${model}?`;
 
@@ -73,7 +70,12 @@ class OZmap {
       return;
     }
     try {
-      let result = await superagent.post(base_url).set({Authorization: this.key}).send(data);
+      let result = await superagent.post(base_url)
+        .timeout({
+          response: 240000,
+          deadline: 1800000
+        })
+        .set({Authorization: this.key}).send(data);
 
       return result.body;
     } catch (e) {
@@ -81,7 +83,7 @@ class OZmap {
     }
   }
 
-  async update({model, model_id, data, retrying}) {
+  async update({model, model_id, data}) {
     let base_url = `${this.url}/api/v2/${model}/${model_id}`;
 
     logger.silly(`Alterando: ${base_url} --> ${JSON.stringify(data)}`);
@@ -90,14 +92,19 @@ class OZmap {
       return;
     }
     try {
-      let result = await superagent.patch(base_url).set({Authorization: this.key}).send(data);
+      let result = await superagent.patch(base_url)
+        .timeout({
+          response: 240000,
+          deadline: 1800000
+        })
+        .set({Authorization: this.key}).send(data);
       return result.body;
     } catch (e) {
       throw e;
     }
   }
 
-  async delete({model, model_id, retrying}) {
+  async delete({model, model_id, timeout}) {
 
     let base_url = `${this.url}/api/v2/${model}/${model_id}`;
 
@@ -107,7 +114,12 @@ class OZmap {
       return;
     }
     try {
-      let result = await superagent.delete(base_url).set({Authorization: this.key}).send();
+      let result = await superagent.delete(base_url)
+        .timeout({
+          response: 240000,
+          deadline: 1800000
+        })
+        .set({Authorization: this.key}).send();
       return result.body;
     } catch (e) {
       throw e;
@@ -131,7 +143,7 @@ class OZmap {
     }
   }
 
-  async _read({model, limit, page, filter, select, sort, populate}) {
+  async _read({model, limit, page, filter, select, sort, populate, timeout}) {
     let body = null;
     let base_url = `${this.url}/api/v2/${model}?`;
 
@@ -188,14 +200,19 @@ class OZmap {
 
     logger.silly(`Buscando: ${base_url} ${body ? JSON.stringify(body) : ''}`);
     try {
-      let result = await superagent.get(base_url).set({Authorization: this.key}).send(body);
+      let result = await superagent.get(base_url)
+        .timeout({
+          response: 240000,
+          deadline: 1800000
+        })
+        .set({Authorization: this.key}).send(body);
       return result.body;
     } catch (e) {
       throw e;
     }
   }
 
-  async readById({model, model_id, select, retrying}) {
+  async readById({model, model_id, select, timeout}) {
     let base_url = `${this.url}/api/v2/${model}/${model_id}?`;
 
     if (select) {
@@ -204,7 +221,12 @@ class OZmap {
 
     logger.silly(`Buscando: ${base_url}`);
     try {
-      let result = await superagent.get(base_url).set({Authorization: this.key}).send();
+      let result = await superagent.get(base_url)
+        .timeout({
+          response: 240000,
+          deadline: 1800000
+        })
+        .set({Authorization: this.key}).send();
 
       return result.body;
     } catch (e) {
@@ -213,7 +235,7 @@ class OZmap {
 
   }
 
-  async fetchAllWithPagination({model, limit = 500, filter, populate, select, sort}) {
+  async fetchAllWithPagination({model, limit = 500, filter, populate, select, sort, timeout}) {
     let finished = false;
     let ret = [];
     let page = 1;
@@ -235,7 +257,7 @@ class OZmap {
     return {rows: ret};
   }
 
-  async customRequest({method = "GET", v2_route = "", query = {}, data}) {
+  async customRequest({method = "GET", v2_route = "", query = {}, data, timeout}) {
     let base_url = `${this.url}/api/v2/${v2_route}?`;
 
     for (let query_name in query) {
@@ -250,7 +272,11 @@ class OZmap {
       return;
     }
     try {
-      let result = await superagent[method.toLowerCase()](base_url).set({Authorization: this.key}).timeout(999999).send(data);
+      let result = await superagent[method.toLowerCase()](base_url).set({Authorization: this.key})
+        .timeout({
+          response: 240000,
+          deadline: 1800000
+        }).send(data);
 
       return result.body;
     } catch (e) {
