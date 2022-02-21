@@ -13,8 +13,7 @@ let Models = {
   network_connector: "network-connectors",
   network_connectable: "network-connectables",
   fiber: "fibers",
-  drop: "drops",
-  horizontal_condominium: "horizontal-condominiums"
+  drop: "drops"
 };
 
 class OZmap {
@@ -72,11 +71,11 @@ class OZmap {
     }
     try {
       let result = await superagent.post(base_url)
-        .timeout({
-          response: 240000,
-          deadline: 1800000
-        })
-        .set({Authorization: this.key}).send(data);
+          .timeout({
+            response: 240000,
+            deadline: 1800000
+          })
+          .set({Authorization: this.key}).send(data);
 
       return result.body;
     } catch (e) {
@@ -84,7 +83,7 @@ class OZmap {
     }
   }
 
-  async update({model, model_id, data}) {
+  async update({model, model_id, data, extra_headers = {}}) {
     let base_url = `${this.url}/api/v2/${model}/${model_id}`;
 
     logger.silly(`Alterando: ${base_url} --> ${JSON.stringify(data)}`);
@@ -94,18 +93,18 @@ class OZmap {
     }
     try {
       let result = await superagent.patch(base_url)
-        .timeout({
-          response: 240000,
-          deadline: 1800000
-        })
-        .set({Authorization: this.key}).send(data);
+          .timeout({
+            response: 240000,
+            deadline: 1800000
+          })
+          .set({Authorization: this.key, ...extra_headers}).send(data);
       return result.body;
     } catch (e) {
       throw e;
     }
   }
 
-  async delete({model, model_id, timeout}) {
+  async delete({model, model_id, timeout, extra_headers = {}}) {
 
     let base_url = `${this.url}/api/v2/${model}/${model_id}`;
 
@@ -116,18 +115,18 @@ class OZmap {
     }
     try {
       let result = await superagent.delete(base_url)
-        .timeout({
-          response: 240000,
-          deadline: 1800000
-        })
-        .set({Authorization: this.key}).send();
+          .timeout({
+            response: 240000,
+            deadline: 1800000
+          })
+          .set({Authorization: this.key, ...extra_headers}).send();
       return result.body;
     } catch (e) {
       throw e;
     }
   }
 
-  async read(model, query) {
+  async read(model, query, extra_headers = {}) {
     if (model instanceof Object && model.constructor === Object) {
       return this._read(model);
     } else if (typeof model === "string") {
@@ -139,12 +138,13 @@ class OZmap {
 
       return this._read({
         model: model,
-        filter: filter
+        filter: filter,
+        extra_headers: extra_headers
       });
     }
   }
 
-  async _read({model, limit, page, filter, select, sort, populate, timeout}) {
+  async _read({model, limit, page, filter, select, sort, populate, timeout, extra_headers = {}}) {
     let body = null;
     let base_url = `${this.url}/api/v2/${model}?`;
 
@@ -202,18 +202,18 @@ class OZmap {
     logger.silly(`Buscando: ${base_url} ${body ? JSON.stringify(body) : ''}`);
     try {
       let result = await superagent.get(base_url)
-        .timeout({
-          response: 240000,
-          deadline: 1800000
-        })
-        .set({Authorization: this.key}).send(body);
+          .timeout({
+            response: 240000,
+            deadline: 1800000
+          })
+          .set({Authorization: this.key, ...extra_headers}).send(body);
       return result.body;
     } catch (e) {
       throw e;
     }
   }
 
-  async readById({model, model_id, select, timeout}) {
+  async readById({model, model_id, select, timeout, extra_headers = {}}) {
     let base_url = `${this.url}/api/v2/${model}/${model_id}?`;
 
     if (select) {
@@ -223,11 +223,14 @@ class OZmap {
     logger.silly(`Buscando: ${base_url}`);
     try {
       let result = await superagent.get(base_url)
-        .timeout({
-          response: 240000,
-          deadline: 1800000
-        })
-        .set({Authorization: this.key}).send();
+          .timeout({
+            response: 240000,
+            deadline: 1800000
+          })
+          .set({
+            Authorization: this.key,
+            ...extra_headers
+          }).send();
 
       return result.body;
     } catch (e) {
@@ -236,13 +239,13 @@ class OZmap {
 
   }
 
-  async fetchAllWithPagination({model, limit = 500, filter, populate, select, sort, timeout}) {
+  async fetchAllWithPagination({model, limit = 500, filter, populate, select, sort, timeout, extra_headers}) {
     let finished = false;
     let ret = [];
     let page = 1;
     try {
       while (!finished) {
-        let {rows: read_page} = await this.read({model, limit, page, filter, populate, select, sort});
+        let {rows: read_page} = await this.read({model, limit, page, filter, populate, select, sort, extra_headers});
         if (read_page.length) {
           ret = ret.concat(read_page);
         } else {
@@ -258,7 +261,7 @@ class OZmap {
     return {rows: ret};
   }
 
-  async customRequest({method = "GET", v2_route = "", query = {}, data, timeout}) {
+  async customRequest({method = "GET", v2_route = "", query = {}, data, timeout, extra_headers = {}}) {
     let base_url = `${this.url}/api/v2/${v2_route}?`;
 
     for (let query_name in query) {
@@ -273,11 +276,11 @@ class OZmap {
       return;
     }
     try {
-      let result = await superagent[method.toLowerCase()](base_url).set({Authorization: this.key})
-        .timeout({
-          response: 240000,
-          deadline: 1800000
-        }).send(data);
+      let result = await superagent[method.toLowerCase()](base_url).set({Authorization: this.key, ...extra_headers})
+          .timeout({
+            response: 240000,
+            deadline: 1800000
+          }).send(data);
 
       return result.body;
     } catch (e) {
@@ -290,14 +293,14 @@ class OZmap {
     let base_url = `${this.url}/api/v2/render/croqui/${property_id}/${export_type}?`;
     logger.debug(`Buscando croqui(${export_type}) com a url: ${base_url}`);
     let res_img = await superagent
-      .get(base_url)
-      .buffer(true)
-      .parse(superagent.parse.image)
-      .set({Authorization: this.key})
-      .timeout({
-        response: 50000,
-        deadline: 50000
-      });
+        .get(base_url)
+        .buffer(true)
+        .parse(superagent.parse.image)
+        .set({Authorization: this.key})
+        .timeout({
+          response: 50000,
+          deadline: 50000
+        });
 
     return res_img.body;
   }
@@ -306,20 +309,20 @@ class OZmap {
     let base_url = `${this.url}/api/v2/render/box/${box_id}/${export_type}`;
     logger.debug(`Buscando box (${export_type}) com a url: ${base_url}`);
     let res_box = await superagent.post(base_url)
-      .send({
-        highlight,
-        exhibition: {
-          icon: "fas fa-list-ol",
-          name: "number",
-          tooltip: "Número da fibra"
-        }
-      })
-      .buffer(true).parse(superagent.parse.image)
-      .set({Authorization: this.key})
-      .timeout({
-        response: 50000,
-        deadline: 50000
-      });
+        .send({
+          highlight,
+          exhibition: {
+            icon: "fas fa-list-ol",
+            name: "number",
+            tooltip: "Número da fibra"
+          }
+        })
+        .buffer(true).parse(superagent.parse.image)
+        .set({Authorization: this.key})
+        .timeout({
+          response: 50000,
+          deadline: 50000
+        });
 
     return res_box.body;
   }
