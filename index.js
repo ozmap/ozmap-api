@@ -13,7 +13,9 @@ let Models = {
   network_connector: "network-connectors",
   network_connectable: "network-connectables",
   fiber: "fibers",
-  drop: "drops"
+  drop: "drops",
+  horizontal_condominium: "horizontal-condominiums"
+
 };
 
 class OZmap {
