@@ -328,6 +328,10 @@ class OZmap {
 
     return res_box.body;
   }
+
+  getLogger(){
+    return logger;
+  }
 }
 
 module.exports = {OZmap: OZmap, OZModels: Models};
