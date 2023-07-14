@@ -26,8 +26,6 @@ jobs:
           node-version: 12
       - name: npm install
         run: npm install
-      - name: tsc
-        run: npm run build
       - name: publish
         uses: JS-DevTools/npm-publish@v1
         with:
