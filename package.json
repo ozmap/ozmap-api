@@ -8,11 +8,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://mateusc@bitbucket.org/developmentOneZero/integracoes.git"
+    "url": "git+https://github.com/ozmap/ozmap-api.git"
   },
   "author": "DevOZ",
   "license": "ISC",
-  "homepage": "https://bitbucket.org/developmentOneZero/integracoes#readme",
+  "homepage": "https://github.com/ozmap",
   "dependencies": {
     "http-status": "^1.4.2",
     "superagent": "^5.2.2",
