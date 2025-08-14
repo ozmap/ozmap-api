@@ -146,7 +146,7 @@ class OZmap {
     }
   }
 
-  async _read({model, limit, page, filter, select, sort, populate, timeout, extra_headers = {}}) {
+  async _read({model, limit, page = null, filter, select, sort, populate, timeout, extra_headers = {}}) {
     let body = null;
     let base_url = `${this.url}/api/v2/${model}?`;
 
@@ -197,6 +197,7 @@ class OZmap {
     if (page != null) {
       base_url = `${base_url}&page=${page}`;
     }
+    
     if (sort != null) {
       base_url = `${base_url}&sort=${JSON.stringify(sort)}`;
     }
@@ -242,25 +243,39 @@ class OZmap {
   }
 
   async fetchAllWithPagination({model, limit = 500, filter, populate, select, sort, timeout, extra_headers}) {
-    let finished = false;
     let ret = [];
-    let page = 1;
+    let has_next_page = false;
+    let next_url;
+
     try {
-      while (!finished) {
-        let {rows: read_page} = await this.read({model, limit, page, filter, populate, select, sort, extra_headers});
-        if (read_page.length) {
-          ret = ret.concat(read_page);
-        } else {
-          finished = true;
+      const { rows: read_page, hasNextPage, nextUrl } = await this.read({model, limit, filter, populate, select, sort, extra_headers});
+
+      ret = ret.concat(read_page || []);
+      has_next_page = hasNextPage;
+      next_url = nextUrl
+
+      while (has_next_page) {
+        logger.silly(`Buscando: ${this.url}${next_url} ${JSON.stringify({filter})}`);
+
+        const { body: response } = await superagent.get(`${this.url}${next_url}`)
+          .timeout({
+            response: 240000,
+            deadline: 1800000
+          })
+          .set({Authorization: this.key, ...extra_headers}).send({filter});
+        
+        if (response.rows && response.rows.length) {
+          ret = ret.concat(response.rows);
         }
-        page++;
+
+        has_next_page = response.hasNextPage;
+        next_url = response.nextUrl;
       }
     } catch (e) {
       throw e;
     }
 
-
-    return {rows: ret};
+    return { rows: ret };
   }
 
   async customRequest({method = "GET", v2_route = "", query = {}, data, timeout, extra_headers = {}}) {
