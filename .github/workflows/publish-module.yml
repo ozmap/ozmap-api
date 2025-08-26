@@ -7,6 +7,10 @@ jobs:
   build:
     name: jsc
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v2
       - name: "cat package.json"
@@ -15,8 +19,6 @@ jobs:
         uses: "phips28/gh-action-bump-version@master"
         with:
           tag-prefix: ''
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
       - name: "cat package.json"
         run: cat ./package.json
       - name: install node v12
