@@ -16,7 +16,7 @@ jobs:
         with:
           tag-prefix: ''
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
       - name: "cat package.json"
         run: cat ./package.json
       - name: install node v12
